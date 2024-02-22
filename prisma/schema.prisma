@@ -1,0 +1,56 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id  String @id 
+  name String?
+  email String @unique
+  password String
+  created_at DateTime @default(now()) @map(name: "created_at")
+
+  communities Community[]
+  members   Member[]
+}
+
+model Community {
+  id String @id 
+  name String
+  slug String  
+  created_at DateTime @default(now()) @map(name:"created_at")
+  updated_at DateTime? @default(now()) @map(name:"updated_at")
+  ownerUser User @relation(fields: [owner] ,references: [id])
+  owner String
+  members   Member[]
+}
+
+model Role {
+  id        String     @id @map(name: "role_id")
+  name      String     
+  created_at DateTime   @default(now()) @map(name: "created_at")
+  updated_at DateTime?  @default(now()) @map(name: "updated_at")
+  member Member[]
+}
+
+model Member {
+  id String @id @map(name:"member_id")
+  community String @map(name: "community_id")
+  user String @map(name:"user_id")
+  role String @map(name:"role_id")
+  created_at DateTime @default(now()) @map(name:"created_at")
+
+  userRef User @relation(fields: [user],references: [id])
+  communityRef Community @relation(fields: [community],references: [id])
+  roleRef Role @relation(fields: [role],references: [id])
+}
